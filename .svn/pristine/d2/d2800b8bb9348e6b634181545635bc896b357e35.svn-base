@@ -1,0 +1,134 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using AForgeRequestLibrary.filter;
+using AForgeRequestLibrary;
+using AForge;
+using AForge.Imaging;
+using AForge.Imaging.Filters;
+using System.Drawing;
+using System.IO;
+using System.Drawing.Imaging;
+
+namespace FilterFunctions
+{
+    public class Filters
+    {
+        public static void applyFilter(ref AForgeData input)
+        {
+            DateTime startComputationTime = DateTime.UtcNow;
+
+            if (input is GaussianBlurFilterData)
+            {
+                GaussianBlurFilterData data = input as GaussianBlurFilterData;
+                GaussianBlurFunc(ref data);
+            }
+            else if (input is GrayscaleFilterData)
+            {
+                GrayscaleFilterData data = input as GrayscaleFilterData;
+                GrayscaleFunc(ref data);
+            }
+            else if (input is OilPaintingFilterData)
+            {
+                //cast the input. I don't know why but you can't cast it inside the OilPaintingFunc call
+                OilPaintingFilterData data = input as OilPaintingFilterData;
+                OilPaintingFunc(ref data);
+            }
+            else if (input is PixellateFilterData)
+            {
+                PixellateFilterData data = input as PixellateFilterData;
+                PixellateFunc(ref data);
+            }
+            else if (input is SepiaFilterData)
+            {
+                SepiaFilterData data = input as SepiaFilterData;
+                SepiaFunc(ref data);
+            }
+            else if (input is SharpenFilterData)
+            {
+                SharpenFilterData data = input as SharpenFilterData;
+                SharpenFunc(ref data);
+            }
+            else if (input is IAForgeData)
+            {
+                // ERROR
+            }
+
+            DateTime endComputationTime = DateTime.UtcNow;
+
+            input.Stats.ComputationTime = (int)(endComputationTime - startComputationTime).TotalMilliseconds;
+        }
+
+        public static void GaussianBlurFunc(ref GaussianBlurFilterData input)
+        {
+            GaussianBlur filter = new GaussianBlur(input.GaussiaSigma, input.KernelSize);
+            Bitmap oBitmap = new Bitmap(input.Image);
+            filter.ApplyInPlace(oBitmap);
+
+            Stream oBitmapStream = new MemoryStream();
+            oBitmap.Save(oBitmapStream, ImageFormat.Jpeg);
+            input.Image = oBitmapStream;
+        }
+
+        public static void GrayscaleFunc(ref GrayscaleFilterData input)
+        {
+            Grayscale filter = new Grayscale(input.Red, input.Green, input.Blue);
+            Bitmap oBitmap = new Bitmap(input.Image);
+            oBitmap = filter.Apply(oBitmap);
+
+            Stream oBitmapStream = new MemoryStream();
+            oBitmap.Save(oBitmapStream, ImageFormat.Jpeg);
+            input.Image = oBitmapStream;
+        }
+
+        public static void OilPaintingFunc(ref OilPaintingFilterData input)
+        {
+            //create the filter and image just like you did before
+            OilPainting filter = new OilPainting(input.BrushSize);
+            Bitmap oBitmap = new Bitmap(input.Image);
+
+            //apply the filter in place. I think its slightly more efficent to do it this way
+            filter.ApplyInPlace(oBitmap);
+
+            //copy the image into a stream and set it in the return object.
+            //I am going to need to modify the AForgeRequestLibrary to correctly dispose of the image..
+            Stream oBitmapStream = new MemoryStream();
+            oBitmap.Save(oBitmapStream, ImageFormat.Jpeg);
+            input.Image = oBitmapStream;
+        }
+
+        public static void PixellateFunc(ref PixellateFilterData input)
+        {
+            Pixellate filter = new Pixellate();
+            Bitmap oBitmap = new Bitmap(input.Image);
+            filter.ApplyInPlace(oBitmap);
+
+            Stream oBitmapStream = new MemoryStream();
+            oBitmap.Save(oBitmapStream, ImageFormat.Jpeg);
+            input.Image = oBitmapStream;
+        }
+
+        public static void SepiaFunc(ref SepiaFilterData input)
+        {
+            Sepia filter = new Sepia();
+            Bitmap oBitmap = new Bitmap(input.Image);
+            filter.ApplyInPlace(oBitmap);
+
+            Stream oBitmapStream = new MemoryStream();
+            oBitmap.Save(oBitmapStream, ImageFormat.Jpeg);
+            input.Image = oBitmapStream;
+        }
+
+        public static void SharpenFunc(ref SharpenFilterData input)
+        {
+            Sharpen filter = new Sharpen();
+            Bitmap oBitmap = new Bitmap(input.Image);
+            filter.ApplyInPlace(oBitmap);
+
+            Stream oBitmapStream = new MemoryStream();
+            oBitmap.Save(oBitmapStream, ImageFormat.Jpeg);
+            input.Image = oBitmapStream;
+        }
+    }
+}

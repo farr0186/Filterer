@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "WindowsAzure_Test", "WindowsAzure_Test\WindowsAzure_Test.ccproj", "{44CF0B75-0825-405C-848F-C62067405ADE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRole1", "WebRole1\WebRole1.csproj", "{37CC09EE-A1D6-478A-8F2C-39FF1A3ABA96}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{4FD2F839-EFA8-498C-B8E2-EF8FA8F7A718}"
+	ProjectSection(SolutionItems) = preProject
+		WebRole1\bin\Newtonsoft.Json.dll = WebRole1\bin\Newtonsoft.Json.dll
+		WebRole1\bin\Newtonsoft.Json.xml = WebRole1\bin\Newtonsoft.Json.xml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{44CF0B75-0825-405C-848F-C62067405ADE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44CF0B75-0825-405C-848F-C62067405ADE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44CF0B75-0825-405C-848F-C62067405ADE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44CF0B75-0825-405C-848F-C62067405ADE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37CC09EE-A1D6-478A-8F2C-39FF1A3ABA96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37CC09EE-A1D6-478A-8F2C-39FF1A3ABA96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37CC09EE-A1D6-478A-8F2C-39FF1A3ABA96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37CC09EE-A1D6-478A-8F2C-39FF1A3ABA96}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VisualSVNWorkingCopyRoot = .
+	EndGlobalSection
+EndGlobal

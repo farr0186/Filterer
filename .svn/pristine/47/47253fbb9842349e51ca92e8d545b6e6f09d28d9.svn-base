@@ -1,0 +1,453 @@
+﻿using System.Windows.Media.Imaging;
+using UserInterface;
+using AForgeRequestLibrary;
+using AForgeRequestLibrary.error;
+using AForgeRequestLibrary.filter;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
+using Microsoft.Phone.Controls;
+using Microsoft.Xna.Framework.Media;
+using System.Collections.ObjectModel;
+using System.IO.IsolatedStorage;
+using Microsoft.Phone;
+using Microsoft.Phone.Shell;
+using System.IO;
+
+namespace UserInterface
+{
+    public partial class EditPicture : PhoneApplicationPage
+    {
+
+        //private static Uri oAzureRequestUri = new Uri("http://127.0.0.1:81/test.rest");
+        private static Uri oAzureRequestUri = new Uri("http://1241052test.cloudapp.net/whatever.rest");
+        //private BitmapImage pic;
+        private BitmapImage[] previousPics = new BitmapImage[5];
+        private int previousPicsIndex = 0;
+        private int filtersDone = 0;
+        private string option1Text, option2Text, option3Text;
+        public EditPicture()
+        {
+            InitializeComponent();
+            //this.pic = CameraRoll.getCurrentImage();
+            this.previousPics[this.previousPicsIndex] = new BitmapImage();
+            this.previousPics[0] = CameraRoll.getCurrentImage();
+            imageWindow.Source = this.previousPics[0];
+            ((ApplicationBarMenuItem)ApplicationBar.MenuItems[0]).IsEnabled = false;//undo button
+            ((ApplicationBarMenuItem)ApplicationBar.MenuItems[1]).IsEnabled = false;//redo button
+            //previousPics[0] = this.pic;
+            AForgeRequest.RequestUri = oAzureRequestUri;
+            //txtK1.TextChanged += txtK1TextInputUpdate;
+        }
+
+        private void SendRequest(AForgeData oRequestData)
+        {
+            try
+            {
+                oRequestData.Image = getJPGFromImageControl(this.previousPics[this.previousPicsIndex]);
+                oRequestData.FileFormat = Imaging.ImageFormats.JPEG;
+                AForgeRequest oRequest = new AForgeRequest(oRequestData);
+                AForgeRequest.RequestUri = oAzureRequestUri;
+                oRequest.OnAForgeSuccess += OnSuccess;
+                oRequest.OnAForgeFailure += OnFailure;
+                oRequest.SendRequestAsync();
+                statusTextbox.Text = "Request sent. Waiting for response.";
+                statusTextbox.Height = 96;
+                //display time
+                //StatusBarPageInfo.Content = string.Format("Request sent in {0} ms. Waiting for response.", m_oStopwatch.ElapsedMilliseconds);
+            }
+            catch (Exception oException)
+            {
+                MessageBox.Show(oException.ToString());
+            }
+        }
+
+        private Stream getJPGFromImageControl(BitmapImage imageC)
+        {
+            Stream stream = new MemoryStream();
+
+            WriteableBitmap bitMap = new WriteableBitmap(imageC);
+
+            //find getting the BitmapImage into the WriteableBitmap
+            bitMap.SaveJpeg(stream, imageC.PixelWidth, imageC.PixelHeight, 0, 100);
+            return stream;
+        }
+
+        private void OnFailure(AForgeError oError)
+        {
+            //statusTextbox.Text = "Failed to received data";
+            Dispatcher.BeginInvoke(() => statusTextbox.Text = String.Format("AForge request Failed in {0} ms. Error: {1}", oError.Stats.TotalTime, oError.Message));
+            Dispatcher.BeginInvoke(() => statusTextbox.Height = 144);
+        }
+
+        private void OnSuccess(IAForgeData oResponseData)
+        {
+            Dispatcher.BeginInvoke(() => OnSuccessUI(oResponseData));
+        }
+
+        private void OnSuccessUI(IAForgeData oResponseData)
+        {
+            //undo.IsEnabled = true;
+            try
+            {
+                //display image
+                AForgeData oData = oResponseData as AForgeData;
+                statusTextbox.Text = String.Format("AForge request completed. Computation time: {0} ms, Total Time: {1} ms", oData.Stats.ComputationTime, oData.Stats.TotalTime);
+                statusTextbox.Height = 144;
+                //this.pic.SetSource(oData.Image);
+                //this.pic.SetSource(oData.Image);
+                //imageWindow.Source = this.pic;
+                if (this.previousPicsIndex == this.filtersDone)
+                    this.filtersDone++;
+                this.previousPicsIndex++;
+                this.previousPics[this.previousPicsIndex] = new BitmapImage();
+                this.previousPics[this.previousPicsIndex].SetSource(oData.Image);
+                imageWindow.Source = this.previousPics[this.previousPicsIndex];
+                ((ApplicationBarMenuItem)ApplicationBar.MenuItems[0]).IsEnabled = true;//undo button
+                //this.previousPics[this.previousPicsIndex] = this.pic;
+            }
+            catch (Exception oException)
+            {
+                MessageBox.Show(oException.ToString());
+            }
+        }
+
+        //sepia filter
+        private void filterHandler(object sender, EventArgs e)
+        {
+            ApplicationBarMenuItem filterOption = sender as ApplicationBarMenuItem;
+
+            switch (filterOption.Text)
+            {
+                case "Sepia Filter":
+                    SepiaFilterData oRequestData1 = new SepiaFilterData();
+                    SendRequest(oRequestData1);
+                    break;
+                case "Pixellate Filter":
+                    PixellateFilterData oRequestData2 = new PixellateFilterData();
+                    SendRequest(oRequestData2);
+                    break;
+                case "Oil Painting Filter":
+                    Dispatcher.BeginInvoke(() => oilPaintingFilterUI(sender, e));
+                    option1Input.TextInput += oilPaintingFilterOption1TextInputUpdate;
+                    break;
+                case "Sharpen Filter":
+                    SharpenFilterData oRequestData4 = new SharpenFilterData();
+                    SendRequest(oRequestData4);
+                    break;
+                case "Gaussian Blur Filter":
+                    Dispatcher.BeginInvoke(() => gaussianBlurFilterUI(sender, e));
+                    option1Input.TextInput += gaussianBlurFilterOption1TextInputUpdate;
+                    option2Input.TextInput += gaussianBlurFilterOption2TextInputUpdate;
+                    break;
+                case "Grayscale Filter":
+                    Dispatcher.BeginInvoke(() => grayscaleFilterUI(sender, e));
+                    option1Input.TextInput += grayscaleFilterOption1TextInputUpdate;
+                    option2Input.TextInput += grayscaleFilterOption2TextInputUpdate;
+                    option3Input.TextInput += grayscaleFilterOption3TextInputUpdate;
+                    break;
+            }
+        }
+        private void oilPaintingFilterUI(object sender, EventArgs e)
+        {
+            InputScope scope = new InputScope();
+            InputScopeName name = new InputScopeName();
+            name.NameValue = InputScopeNameValue.Default;  //<--Here 
+            scope.Names.Add(name);
+            option1Input.Visibility = System.Windows.Visibility.Visible;
+            Dispatcher.BeginInvoke(() => option1Input.Text = "12");
+            Dispatcher.BeginInvoke(() => statusTextbox.Text = "Enter a Brush Size and hit return");
+            Dispatcher.BeginInvoke(() => statusTextbox.Height = 48);
+            option1Input.UpdateLayout();
+            option1Input.InputScope = scope;
+            option1Input.Focus();
+        }
+        private void oilPaintingFilterOption1TextInputUpdate(object sender, EventArgs e)
+        {
+            int o1;
+            option1Text = option1Input.Text;
+            option1Input.Visibility = System.Windows.Visibility.Collapsed;
+            if (int.TryParse(option1Text, out o1))
+                o1 = int.Parse(option1Text);
+            else o1 = 12;
+            OilPaintingFilterData oRequestData = new OilPaintingFilterData(o1);
+            SendRequest(oRequestData);
+            option1Input.TextInput -= oilPaintingFilterOption1TextInputUpdate;
+
+        }
+        private void gaussianBlurFilterUI(object sender, EventArgs e)
+        {
+            InputScope scope = new InputScope();
+            InputScopeName name = new InputScopeName();
+            name.NameValue = InputScopeNameValue.Default;  //<--Here 
+            scope.Names.Add(name);
+            option1Input.Visibility = System.Windows.Visibility.Visible;
+            Dispatcher.BeginInvoke(() => option1Input.Text = "11");
+            Dispatcher.BeginInvoke(() => statusTextbox.Text = "Enter a Kernel Size and hit return");
+            Dispatcher.BeginInvoke(() => statusTextbox.Height = 48);
+            option1Input.UpdateLayout();
+            option1Input.InputScope = scope;
+            option1Input.Focus();
+        }
+        private void gaussianBlurFilterOption1TextInputUpdate(object sender, EventArgs e)
+        {
+            option1Text = option1Input.Text;
+            option1Input.Visibility = System.Windows.Visibility.Collapsed;
+            InputScope scope = new InputScope();
+            InputScopeName name = new InputScopeName();
+            name.NameValue = InputScopeNameValue.Default;  //<--Here 
+            scope.Names.Add(name);
+            option2Input.Visibility = System.Windows.Visibility.Visible;
+            Dispatcher.BeginInvoke(() => option2Input.Text = "4.0");
+            Dispatcher.BeginInvoke(() => statusTextbox.Text = "Enter a Gaussian Sigma value and hit return");
+            Dispatcher.BeginInvoke(() => statusTextbox.Height = 96);
+            option2Input.UpdateLayout();
+            option2Input.InputScope = scope;
+            option2Input.Focus();
+        }
+        private void gaussianBlurFilterOption2TextInputUpdate(object sender, EventArgs e)
+        {
+            int o1;
+            float o2;
+            option2Text = option2Input.Text;
+            option2Input.Visibility = System.Windows.Visibility.Collapsed;
+            if (int.TryParse(option1Text, out o1))
+                o1 = int.Parse(option1Text);
+            else o1 = 11;
+            if (float.TryParse(option2Text, out o2))
+                o2 = float.Parse(option2Text);
+            else o2 = 4.0f;
+            GaussianBlurFilterData oRequestData = new GaussianBlurFilterData(o1,o2);
+            SendRequest(oRequestData);
+            option1Input.TextInput -= gaussianBlurFilterOption1TextInputUpdate;
+            option2Input.TextInput -= gaussianBlurFilterOption2TextInputUpdate;
+
+        }
+        private void grayscaleFilterUI(object sender, EventArgs e)
+        {
+            InputScope scope = new InputScope();
+            InputScopeName name = new InputScopeName();
+            name.NameValue = InputScopeNameValue.Default;
+            scope.Names.Add(name);
+            option1Input.Visibility = System.Windows.Visibility.Visible;
+            Dispatcher.BeginInvoke(() => option1Input.Text = "0.2125");
+            Dispatcher.BeginInvoke(() => statusTextbox.Text = "Enter a Red color value and hit return");
+            Dispatcher.BeginInvoke(() => statusTextbox.Height = 96);
+            option1Input.UpdateLayout();
+            option1Input.InputScope = scope;
+            option1Input.Focus();
+        }
+        private void grayscaleFilterOption1TextInputUpdate(object sender, EventArgs e)
+        {
+            option1Text = option1Input.Text;
+            option1Input.Visibility = System.Windows.Visibility.Collapsed;
+            InputScope scope = new InputScope();
+            InputScopeName name = new InputScopeName();
+            name.NameValue = InputScopeNameValue.Default;
+            scope.Names.Add(name);
+            option2Input.Visibility = System.Windows.Visibility.Visible;
+            Dispatcher.BeginInvoke(() => option2Input.Text = "0.7154");
+            Dispatcher.BeginInvoke(() => statusTextbox.Text = "Enter a Green color value and hit return");
+            Dispatcher.BeginInvoke(() => statusTextbox.Height = 96);
+            option2Input.UpdateLayout();
+            option2Input.InputScope = scope;
+            option2Input.Focus();
+        }
+        private void grayscaleFilterOption2TextInputUpdate(object sender, EventArgs e)
+        {
+            option2Text = option2Input.Text;
+            option2Input.Visibility = System.Windows.Visibility.Collapsed;
+            InputScope scope = new InputScope();
+            InputScopeName name = new InputScopeName();
+            name.NameValue = InputScopeNameValue.Default;
+            scope.Names.Add(name);
+            option3Input.Visibility = System.Windows.Visibility.Visible;
+            Dispatcher.BeginInvoke(() => option3Input.Text = "0.0721");
+            Dispatcher.BeginInvoke(() => statusTextbox.Text = "Enter a Blue color value and hit return");
+            Dispatcher.BeginInvoke(() => statusTextbox.Height = 96);
+            option3Input.UpdateLayout();
+            option3Input.InputScope = scope;
+            option3Input.Focus();
+
+        }
+        private void grayscaleFilterOption3TextInputUpdate(object sender, EventArgs e)
+        {
+            float o1,o2,o3;
+            option3Text = option3Input.Text;
+            option3Input.Visibility = System.Windows.Visibility.Collapsed;
+            if (float.TryParse(option1Text, out o1))
+                o1 = float.Parse(option1Text);
+            else o1 = 0.2125f;
+            if (float.TryParse(option2Text, out o2))
+                o2 = float.Parse(option2Text);
+            else o2 = 0.7154f;
+            if (float.TryParse(option3Text, out o3))
+                o3 = float.Parse(option3Text);
+            else o3 = 0.0721f;
+            GrayscaleFilterData oRequestData6 = new GrayscaleFilterData(o1,o2,o3);
+            SendRequest(oRequestData6);
+            option1Input.TextInput -= grayscaleFilterOption1TextInputUpdate;
+            option2Input.TextInput -= grayscaleFilterOption2TextInputUpdate;
+            option3Input.TextInput -= grayscaleFilterOption3TextInputUpdate;
+
+        }
+
+        //sepia filter
+        private void options1ButtonHandler(object sender, EventArgs e)
+        {
+            SepiaFilterData oRequestData = new SepiaFilterData();
+            SendRequest(oRequestData);
+        }
+        //pixellate filter
+        private void options2ButtonHandler(object sender, EventArgs e)
+        {
+            PixellateFilterData oRequestData = new PixellateFilterData();
+            SendRequest(oRequestData);
+        }
+
+        //oil painting filter
+        private void options3ButtonHandler(object sender, EventArgs e)
+        {
+            OilPaintingFilterData oRequestData = new OilPaintingFilterData();
+            SendRequest(oRequestData);
+        }
+
+        //sharpen filter
+        private void options4ButtonHandler(object sender, EventArgs e)
+        {
+            SharpenFilterData oRequestData = new SharpenFilterData();
+            SendRequest(oRequestData);
+        }
+
+        private void options5ButtonHandler(object sender, EventArgs e)
+        {
+            //GaussianBlurFilterData oRequestData = new GaussianBlurFilterData(oDialog.KernelSize, oDialog.GaussiaSigma);
+            //SendRequest(oRequestData);
+        }
+
+        private void options6ButtonHandler(object sender, EventArgs e)
+        {
+            //GrayscaleFilterData oRequestData = new GrayscaleFilterData(oDialog.Red, oDialog.Green, oDialog.Blue);
+            //SendRequest(oRequestData);
+        }
+
+        private void undoFilterHandler(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(() => undoFilterHandlerUI(sender, e));
+        }
+
+        private void undoFilterHandlerUI(object sender, EventArgs e)
+        {
+            if (this.previousPicsIndex > 0)
+            {
+                this.previousPicsIndex--;
+                //this.pic = this.previousPics[this.previousPicsIndex];
+                //imageWindow.Source = this.pic;
+                imageWindow.Source = this.previousPics[this.previousPicsIndex];
+                statusTextbox.Text = "Photo filter undone";
+                statusTextbox.Height = 96;
+                if (this.previousPicsIndex == 0)
+                    ((ApplicationBarMenuItem)ApplicationBar.MenuItems[0]).IsEnabled = false;//undo button
+                ((ApplicationBarMenuItem)ApplicationBar.MenuItems[1]).IsEnabled = true;//redo button
+            }
+                //debugging - shouldn't happen anymore
+            else if (this.filtersDone == 0)
+                statusTextbox.Text = "No filtering done yet. Stop clicking undo";
+            else
+                statusTextbox.Text = "You're back to the original photo. Stop clicking undo";
+
+        }
+
+        private void redoFilterHandler(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(() => redoFilterHandlerUI(sender, e));
+        }
+
+        private void redoFilterHandlerUI(object sender, EventArgs e)
+        {
+            if (this.previousPicsIndex < this.filtersDone)
+            {
+                this.previousPicsIndex++;
+                //this.pic = this.previousPics[this.previousPicsIndex];
+                //imageWindow.Source = this.pic;
+                imageWindow.Source = this.previousPics[this.previousPicsIndex];
+                statusTextbox.Text = "Photo filter redone";
+                statusTextbox.Height = 96;
+                if (this.previousPicsIndex == this.filtersDone)
+                    ((ApplicationBarMenuItem)ApplicationBar.MenuItems[1]).IsEnabled = false;//redo button
+                ((ApplicationBarMenuItem)ApplicationBar.MenuItems[0]).IsEnabled = true;//undo button
+            }
+                //debugging - shouldn't happen anymore
+            else if (this.filtersDone == 0)
+                statusTextbox.Text = "No filtering done yet. Stop clicking undo";
+            else
+                statusTextbox.Text = "You're at the end of the line";
+
+        }
+
+        private void savePictureHandler(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(() => savePictureHandlerUI(sender, e));
+        }
+        private void savePictureHandlerUI(object sender, EventArgs e)
+        {
+            MediaLibrary library = new MediaLibrary();
+            Stream stream = new MemoryStream();
+            String filename = "ocrAppImage" + (library.Pictures.Count+1) + ".jpg";
+            MediaPlayer.Queue.ToString();
+            foreach (MediaSource source in MediaSource.GetAvailableMediaSources())
+            {
+                if (source.MediaSourceType == MediaSourceType.LocalDevice)
+                {
+                    library = new MediaLibrary(source);
+                }
+            }
+            try
+            {
+
+                //WriteableBitmap bitMap = new WriteableBitmap(this.pic);
+                WriteableBitmap bitMap = new WriteableBitmap(this.previousPics[this.previousPicsIndex]);
+
+                //find getting the BitmapImage into the WriteableBitmap
+                //bitMap.SaveJpeg(stream, this.pic.PixelWidth, this.pic.PixelHeight, 0, 100);
+                bitMap.SaveJpeg(stream, this.previousPics[this.previousPicsIndex].PixelWidth, this.previousPics[this.previousPicsIndex].PixelHeight, 0, 100);
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                library.SavePictureToCameraRoll(filename, stream);
+                Deployment.Current.Dispatcher.BeginInvoke(delegate()
+                {
+                    //txtDebug.Text = "Photo has been saved to camera roll.";
+                });
+                stream.Seek(0, SeekOrigin.Begin);
+
+                using (IsolatedStorageFile isStore = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    using (IsolatedStorageFileStream targetStream = isStore.OpenFile(filename, FileMode.Create, FileAccess.Write))
+                    {
+                        byte[] readBuffer = new byte[4096];
+                        int bytesRead = -1;
+                        while ((bytesRead = stream.Read(readBuffer, 0, readBuffer.Length)) > 0)
+                        {
+                            targetStream.Write(readBuffer, 0, bytesRead);
+                        }
+                    }
+                }
+                statusTextbox.Text = "Photo saved successfully";
+                statusTextbox.Height = 96;
+            }
+            finally
+            {
+                stream.Close();
+            }
+
+        }
+    }
+}

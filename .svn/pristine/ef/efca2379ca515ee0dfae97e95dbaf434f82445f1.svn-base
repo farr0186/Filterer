@@ -1,0 +1,241 @@
+﻿using System.Windows.Media.Imaging;
+using UserInterface;
+using AForgeRequestLibrary;
+using AForgeRequestLibrary.error;
+using AForgeRequestLibrary.filter;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
+using Microsoft.Phone.Controls;
+using Microsoft.Xna.Framework.Media;
+using System.Collections.ObjectModel;
+using System.IO.IsolatedStorage;
+using Microsoft.Phone;
+using System.IO;
+using System.Diagnostics;
+
+namespace UserInterface
+{
+    public partial class EditPicture : PhoneApplicationPage
+    {
+
+        //private static Uri oAzureRequestUri = new Uri("http://127.0.0.1:81/test.rest");
+        private static Uri oAzureRequestUri = new Uri("http://1241052test.cloudapp.net/whatever.rest");
+        private Stopwatch m_oStopwatch;
+        //private BitmapImage pic;
+        private BitmapImage[] previousPics = new BitmapImage[5];
+        private int previousPicsIndex = 0;
+        private int filtersDone = 0;
+        public EditPicture()
+        {
+            InitializeComponent();
+            //this.pic = CameraRoll.getCurrentImage();
+            this.previousPics[this.previousPicsIndex] = new BitmapImage();
+            this.previousPics[0] = CameraRoll.getCurrentImage();
+            imageWindow.Source = this.previousPics[0];
+            //previousPics[0] = this.pic;
+            AForgeRequest.RequestUri = oAzureRequestUri;
+        }
+
+        private void SendRequest(AForgeData oRequestData)
+        {
+            try
+            {
+                m_oStopwatch = Stopwatch.StartNew();
+                oRequestData.Image = getJPGFromImageControl(this.previousPics[this.previousPicsIndex]);
+                oRequestData.FileFormat = Imaging.ImageFormats.JPEG;
+                AForgeRequest oRequest = new AForgeRequest(oRequestData);
+                AForgeRequest.RequestUri = oAzureRequestUri;
+                oRequest.OnAForgeSuccess += OnSuccess;
+                oRequest.OnAForgeFailure += OnFailure;
+                oRequest.SendRequestAsync();
+                m_oStopwatch.Stop();
+                statusTextbox.Text = string.Format("Request sent in {0} ms. Waiting for response.", m_oStopwatch.ElapsedMilliseconds);
+                this.filtersDone++;
+                //display time
+                m_oStopwatch = Stopwatch.StartNew();
+                //StatusBarPageInfo.Content = string.Format("Request sent in {0} ms. Waiting for response.", m_oStopwatch.ElapsedMilliseconds);
+            }
+            catch (Exception oException)
+            {
+                MessageBox.Show(oException.ToString());
+            }
+        }
+
+        private Stream getJPGFromImageControl(BitmapImage imageC)
+        {
+            Stream stream = new MemoryStream();
+
+            WriteableBitmap bitMap = new WriteableBitmap(imageC);
+
+            //find getting the BitmapImage into the WriteableBitmap
+            bitMap.SaveJpeg(stream, imageC.PixelWidth, imageC.PixelHeight, 0, 100);
+            return stream;
+        }
+
+        private void OnFailure(AForgeError oError)
+        {
+            m_oStopwatch.Stop();
+            //statusTextbox.Text = "Failed to received data";
+            Dispatcher.BeginInvoke(() => statusTextbox.Text = String.Format("AForge request Failed in {0} ms. Error: {1}", m_oStopwatch.ElapsedMilliseconds, oError.Message));
+        }
+
+        private void OnSuccess(IAForgeData oResponseData)
+        {
+            Dispatcher.BeginInvoke(() => OnSuccessUI(oResponseData));
+        }
+
+        private void OnSuccessUI(IAForgeData oResponseData)
+        {
+            m_oStopwatch.Stop();
+            //undo.IsEnabled = true;
+            try
+            {
+                //display image
+                AForgeData oData = oResponseData as AForgeData;
+                statusTextbox.Text = String.Format("AForge request completed in {0} ms.", m_oStopwatch.ElapsedMilliseconds);
+                //this.pic.SetSource(oData.Image);
+                //this.pic.SetSource(oData.Image);
+                //imageWindow.Source = this.pic;
+                this.previousPicsIndex++;
+                this.previousPics[this.previousPicsIndex] = new BitmapImage();
+                this.previousPics[this.previousPicsIndex].SetSource(oData.Image);
+                imageWindow.Source = this.previousPics[this.previousPicsIndex];
+                //this.previousPics[this.previousPicsIndex] = this.pic;
+            }
+            catch (Exception oException)
+            {
+                MessageBox.Show(oException.ToString());
+            }
+        }
+
+        //sepia filter
+        private void options1ButtonHandler(object sender, EventArgs e)
+        {
+            SepiaFilterData oRequestData = new SepiaFilterData();
+            SendRequest(oRequestData);
+        }
+        //pixellate filter
+        private void options2ButtonHandler(object sender, EventArgs e)
+        {
+            PixellateFilterData oRequestData = new PixellateFilterData();
+            SendRequest(oRequestData);
+        }
+
+        //oil painting filter
+        private void options3ButtonHandler(object sender, EventArgs e)
+        {
+            OilPaintingFilterData oRequestData = new OilPaintingFilterData();
+            SendRequest(oRequestData);
+        }
+
+        //sharpen filter
+        private void options4ButtonHandler(object sender, EventArgs e)
+        {
+            SharpenFilterData oRequestData = new SharpenFilterData();
+            SendRequest(oRequestData);
+        }
+
+        private void options5ButtonHandler(object sender, EventArgs e)
+        {
+            //GaussianBlurFilterData oRequestData = new GaussianBlurFilterData(oDialog.KernelSize, oDialog.GaussiaSigma);
+            //SendRequest(oRequestData);
+        }
+
+        private void options6ButtonHandler(object sender, EventArgs e)
+        {
+            //GrayscaleFilterData oRequestData = new GrayscaleFilterData(oDialog.Red, oDialog.Green, oDialog.Blue);
+            //SendRequest(oRequestData);
+        }
+
+        private void undoFilterHandler(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(() => undoFilterHandlerUI(sender, e));
+        }
+
+        private void undoFilterHandlerUI(object sender, EventArgs e)
+        {
+            if (this.previousPicsIndex > 0)
+            {
+                this.previousPicsIndex--;
+                //this.pic = this.previousPics[this.previousPicsIndex];
+                //imageWindow.Source = this.pic;
+                imageWindow.Source = this.previousPics[this.previousPicsIndex];
+                statusTextbox.Text = "Photo filter undone";
+            }
+            else if (this.filtersDone==0)
+                statusTextbox.Text = "No filtering done yet. Stop clicking undo";
+            else
+                statusTextbox.Text = "You're back to the original photo. Stop clicking undo";
+
+        }
+
+        private void savePictureHandler(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(() => savePictureHandlerUI(sender, e));
+        }
+        private void savePictureHandlerUI(object sender, EventArgs e)
+        {
+            MediaLibrary library = new MediaLibrary();
+            Stream stream = new MemoryStream();
+            String filename = "ocrAppImage" + m_oStopwatch.ElapsedMilliseconds + ".jpg";
+            MediaPlayer.Queue.ToString();
+            foreach (MediaSource source in MediaSource.GetAvailableMediaSources())
+            {
+                if (source.MediaSourceType == MediaSourceType.LocalDevice)
+                {
+                    library = new MediaLibrary(source);
+                }
+            }
+            try
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(delegate()
+                {
+                    //txtDebug.Text = "Captured image available, saving photo.";
+                });
+
+                //WriteableBitmap bitMap = new WriteableBitmap(this.pic);
+                WriteableBitmap bitMap = new WriteableBitmap(this.previousPics[this.previousPicsIndex]);
+
+                //find getting the BitmapImage into the WriteableBitmap
+                //bitMap.SaveJpeg(stream, this.pic.PixelWidth, this.pic.PixelHeight, 0, 100);
+                bitMap.SaveJpeg(stream, this.previousPics[this.previousPicsIndex].PixelWidth, this.previousPics[this.previousPicsIndex].PixelHeight, 0, 100);
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                library.SavePictureToCameraRoll(filename, stream);
+                Deployment.Current.Dispatcher.BeginInvoke(delegate()
+                {
+                    //txtDebug.Text = "Photo has been saved to camera roll.";
+                });
+                stream.Seek(0, SeekOrigin.Begin);
+
+                using (IsolatedStorageFile isStore = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    using (IsolatedStorageFileStream targetStream = isStore.OpenFile(filename, FileMode.Create, FileAccess.Write))
+                    {
+                        byte[] readBuffer = new byte[4096];
+                        int bytesRead = -1;
+                        while ((bytesRead = stream.Read(readBuffer, 0, readBuffer.Length)) > 0)
+                        {
+                            targetStream.Write(readBuffer, 0, bytesRead);
+                        }
+                    }
+                }
+                statusTextbox.Text = "Photo saved successfully";
+            }
+            finally
+            {
+                stream.Close();
+            }
+
+        }
+    }
+}

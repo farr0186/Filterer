@@ -1,0 +1,7 @@
+C:\Users\Patrick\Documents\OCRTranslateSVN\cloud\clientcommunicationtest\WPClientCommunication\bin\Debug\WPClientCommunication.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\cloud\clientcommunicationtest\WPClientCommunication\bin\Debug\WPClientCommunication.pdb
+C:\Users\Patrick\Documents\OCRTranslateSVN\cloud\clientcommunicationtest\WPClientCommunication\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\cloud\clientcommunicationtest\WPClientCommunication\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Patrick\Documents\OCRTranslateSVN\cloud\clientcommunicationtest\WPClientCommunication\obj\Debug\WPClientCommunication.csprojResolveAssemblyReference.cache
+C:\Users\Patrick\Documents\OCRTranslateSVN\cloud\clientcommunicationtest\WPClientCommunication\obj\Debug\WPClientCommunication.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\cloud\clientcommunicationtest\WPClientCommunication\obj\Debug\WPClientCommunication.pdb

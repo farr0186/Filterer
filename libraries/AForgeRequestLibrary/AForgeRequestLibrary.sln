@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AForgeRequestLibrary", "AForgeRequestLibrary\AForgeRequestLibrary.csproj", "{C44AFC41-9C28-4450-8D12-246607ED2353}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "AForgeRequestLibrary\UnitTest\UnitTest.csproj", "{DB7AFA80-5728-4E4C-8367-D3CEBE2BC0C4}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C44AFC41-9C28-4450-8D12-246607ED2353}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C44AFC41-9C28-4450-8D12-246607ED2353}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C44AFC41-9C28-4450-8D12-246607ED2353}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C44AFC41-9C28-4450-8D12-246607ED2353}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB7AFA80-5728-4E4C-8367-D3CEBE2BC0C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB7AFA80-5728-4E4C-8367-D3CEBE2BC0C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB7AFA80-5728-4E4C-8367-D3CEBE2BC0C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB7AFA80-5728-4E4C-8367-D3CEBE2BC0C4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

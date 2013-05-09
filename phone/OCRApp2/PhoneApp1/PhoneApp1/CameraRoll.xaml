@@ -1,0 +1,40 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="UserInterface.CameraRoll"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    mc:Ignorable="d" shell:SystemTray.IsVisible="True" d:DesignHeight="768" d:DesignWidth="480">
+
+
+
+    <ListBox Margin="0,0,-12,0" Name="list">
+    	<StackPanel Height="760" Width="484">
+    		<Image Height="667" x:Name="imageWindow" Stretch="Fill" Width="474" Margin="5,0" />
+    		<Grid Height="90" Margin="0,0,8,0">
+    			<Button x:Name="previous" Click="cameraRollButtonDispatch" Content="Previous" HorizontalAlignment="Left" Margin="8,11,0,7" d:LayoutOverrides="Height" FontSize="21.333" Width="139"/>
+    			<Button x:Name = "translate" Click="cameraRollButtonDispatch" Content="Translate" Margin="163,12,173,7" FontSize="21.333"/>
+    			<Button x:Name = "next" Click="cameraRollButtonDispatch" Content="Next" HorizontalAlignment="Right" Margin="0,8,8,8" Width="140" FontSize="21.333"/>
+    		</Grid>           
+        </StackPanel>
+    </ListBox>
+
+    <!--Sample code showing usage of ApplicationBar-->
+    <!--<phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Button 1"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Button 2"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="MenuItem 1"/>
+                <shell:ApplicationBarMenuItem Text="MenuItem 2"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>-->
+
+</phone:PhoneApplicationPage>

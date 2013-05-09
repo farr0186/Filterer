@@ -1,0 +1,41 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="UserInterface.EditPicture"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    mc:Ignorable="d" shell:SystemTray.IsVisible="True" d:DesignHeight="696" d:DesignWidth="480">
+
+
+
+    <ListBox Margin="0,0,-12,0" Name="list">
+        <StackPanel Height="760" Width="484">
+            <Image Height="608" x:Name="imageWindow" Stretch="Fill" Width="474" Margin="5,0" />
+            <TextBox x:Name="statusTextbox" Margin="8" TextWrapping="Wrap" Text="Status"/>
+            <TextBox x:Name="noPictures" Height="123" Margin="62,-500,71,0" TextWrapping="Wrap" Text="No Pictures in the Camera Roll" HorizontalAlignment="Center" VerticalAlignment="Top" VerticalScrollBarVisibility="Hidden" Width="300" Visibility="Collapsed"/>
+        </StackPanel>
+    </ListBox>
+
+    <!--Sample code showing usage of ApplicationBar-->
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar Mode ="Default" IsMenuEnabled="True">
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem x:Name="undo" Text="Undo"  Click="undoFilterHandler"/>
+                <shell:ApplicationBarMenuItem x:Name="savePicture" Text="Save Picture"  Click="savePictureHandler"/>
+                <shell:ApplicationBarMenuItem x:Name="sepiaFilter" Text="Sepia Filter"  Click="options1ButtonHandler"/>
+                <shell:ApplicationBarMenuItem x:Name="pixellateFilter" Text="Pixellate Filter"  Click="options2ButtonHandler"/>
+                <shell:ApplicationBarMenuItem x:Name="oilPaintingFilter" Text="Oil Painting Filter"  Click="options3ButtonHandler"/>
+                <shell:ApplicationBarMenuItem x:Name="sharpenFilter" Text="Sharpen Filter"  Click="options4ButtonHandler"/>
+                <shell:ApplicationBarMenuItem x:Name="option5" Text="Option 5"  Click="options5ButtonHandler"/>
+                <shell:ApplicationBarMenuItem x:Name="option6" Text="Option 6"  Click="options6ButtonHandler"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+
+</phone:PhoneApplicationPage>

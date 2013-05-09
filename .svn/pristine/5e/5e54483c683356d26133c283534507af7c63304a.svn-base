@@ -1,0 +1,157 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+using Newtonsoft.Json.Bson;
+using System.Net;
+using System.Diagnostics;
+using AForgeRequestLibrary.filter;
+using AForgeRequestLibrary.web;
+using AForgeRequestLibrary.error;
+using AForgeRequestLibrary.util;
+
+namespace AForgeRequestLibrary
+{
+    public class AForgeRequest : IAzureWebRequestHandler
+    {
+
+        private long m_lBefore;
+        private long m_lAfter;
+
+        private static Uri oAzureRequestUri = new Uri("http://127.0.0.1:81/test.rest");
+        //private static Uri oAzureRequestUri = new Uri("http://1241052test.cloudapp.net/whatever.rest");
+        public static Uri RequestUri 
+        { 
+            get
+            {
+                return oAzureRequestUri;
+            }
+            set
+            {
+                oAzureRequestUri = value;
+            }
+        }
+
+        public IAForgeData RequestData { get; set; }
+
+        private IAzureWebRequest oAzureWebRequest;
+
+        /// <summary>
+        /// The HttpRequest timeout in milliseconds
+        /// </summary>
+        public int Timeout 
+        { 
+            get
+            {
+                return oAzureWebRequest.Timeout;
+            }
+            set
+            {
+                oAzureWebRequest.Timeout = value;
+            }
+        }
+
+        public delegate void OnAForgeSuccessEventHandler(IAForgeData oResponseData);
+        public event OnAForgeSuccessEventHandler OnAForgeSuccess;
+
+        public delegate void OnAForgeFailureEventHandler(AForgeError oError);
+        public event OnAForgeFailureEventHandler OnAForgeFailure;
+
+        public AForgeRequest()
+        {
+            oAzureWebRequest = new AzureWebRequest(oAzureRequestUri);
+            oAzureWebRequest.Handler = this;
+        }
+
+        public AForgeRequest(IAForgeData oRequestData)
+        {
+            RequestData = oRequestData;
+            oAzureWebRequest = new AzureWebRequest(oAzureRequestUri);
+            oAzureWebRequest.Handler = this;
+        }
+
+        public AForgeRequest(IAForgeData oRequestData, IAzureWebRequest oWebRequest)
+        {
+            RequestData = oRequestData;
+            oAzureWebRequest = oWebRequest;
+            oAzureWebRequest.Handler = this;
+        }
+
+        /// <summary>
+        /// Sends a translation request to Azure asychronously
+        /// </summary>
+        public void SendRequestAsync()
+        {
+            //check that all required fields are non-empty before sending the request
+            if (RequestData == null)
+            {
+                throw new ArgumentNullException("The request data to be sent to the server cannot be null");
+            }
+
+            RequestData.Stats.BeginRequestTime = DateTime.UtcNow;
+            oAzureWebRequest.BeginRequestAsync();
+        }
+
+        public void HandleRequestAsync(ref Stream oStream)
+        {
+            AForgeSerializer.SerializeToBson(RequestData, ref oStream);
+        }
+
+        public void HandleResponseAsync(HttpStatusCode eStatusCode, HttpWebResponse oWebResponse)
+        {
+            //if the request was successful
+            if (eStatusCode == HttpStatusCode.OK)
+            {
+                using (Stream oStreamResponse = oWebResponse.GetResponseStream())
+                {
+                    //if a Event handler is registered for this 
+                    if (OnAForgeSuccess != null)
+                    {
+
+                        Stream oBsonStream = new MemoryStream();
+                        //copy the response stream into a stream
+                        StreamUtils.StreamCopy(oStreamResponse, oBsonStream);
+
+
+                        //attempt to deserialize the response
+                        try
+                        {
+                            //read fom the Bson stream into a new object
+                            IAForgeData oResponseData = AForgeFactory.Create(ref oBsonStream);
+                            oResponseData.Stats.EndResponseTime = DateTime.Now; //This should be set to our timezone since the serialization handles the timezone
+                            OnAForgeSuccess(oResponseData);
+                        }
+                        catch (Exception e)
+                        {
+                            //the response could not be deserialized
+                            Debug.WriteLine("There was an error deserializing the response from the server. Exception: {0} {1}", e.Message, e.StackTrace);
+                            OnAForgeFailure(new AForgeError(Errors.BsonDeserializationError,
+                                String.Format("There was an error deserializing the response from the server. Exception: {0} {1}", e.Message, e.StackTrace)));
+                        }
+                        finally
+                        {
+                            oBsonStream.Dispose();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (OnAForgeFailure != null)
+                {
+                    if (oWebResponse != null)
+                    {
+                        OnAForgeFailure(new AForgeError(oWebResponse.StatusCode.ToString(), oWebResponse.StatusDescription));
+                    }
+                    else
+                    {
+                        OnAForgeFailure(new AForgeError("100", "The response was null."));
+                    }
+                }
+            }
+
+            Debug.WriteLine("Finished GetResponseCallback");
+        }
+    }  
+}

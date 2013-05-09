@@ -1,0 +1,8 @@
+C:\Users\Patrick\Documents\OCRTranslateSVN\libraries\AForgeRequestLibrary\AForgeRequestLibrary\obj\Debug\AForgeRequestLibrary.csprojResolveAssemblyReference.cache
+C:\Users\Patrick\Documents\OCRTranslateSVN\libraries\AForgeRequestLibrary\AForgeRequestLibrary\bin\Debug\AForgeRequestLibrary.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\libraries\AForgeRequestLibrary\AForgeRequestLibrary\bin\Debug\AForgeRequestLibrary.pdb
+C:\Users\Patrick\Documents\OCRTranslateSVN\libraries\AForgeRequestLibrary\AForgeRequestLibrary\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\libraries\AForgeRequestLibrary\AForgeRequestLibrary\bin\Debug\Newtonsoft.Json.pdb
+C:\Users\Patrick\Documents\OCRTranslateSVN\libraries\AForgeRequestLibrary\AForgeRequestLibrary\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Patrick\Documents\OCRTranslateSVN\libraries\AForgeRequestLibrary\AForgeRequestLibrary\obj\Debug\AForgeRequestLibrary.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\libraries\AForgeRequestLibrary\AForgeRequestLibrary\obj\Debug\AForgeRequestLibrary.pdb

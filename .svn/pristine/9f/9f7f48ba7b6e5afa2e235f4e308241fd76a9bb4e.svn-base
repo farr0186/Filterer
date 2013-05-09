@@ -1,0 +1,294 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Web;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.Diagnostics;
+using Microsoft.WindowsAzure.ServiceRuntime;
+using System.Drawing;
+using System.Runtime.Serialization;
+using System.IO;
+using BsonCommunicationLibrary;
+
+namespace WebRole1
+{
+    public class WebRole : RoleEntryPoint
+    {
+        public override bool OnStart()
+        {
+            // For information on handling configuration changes
+            // see the MSDN topic at http://go.microsoft.com/fwlink/?LinkId=166357.
+
+            return base.OnStart();
+        }
+        
+    }
+
+    public class REST_Handler : IHttpHandler
+    {
+        #region HANDLER
+
+        private ErrorHandler.ErrorHandler errHandler;
+
+        private string translationData = "";
+
+        public bool IsReusable
+        {
+            // Return false in case your Managed Handler cannot be reused for another request.
+            // Usually this would be false in case you have some state information preserved per request.
+            get { return false; }
+        }
+
+        public void ProcessRequest(HttpContext context)
+        {
+            try
+            {
+                string url = Convert.ToString(context.Request.Url);
+                errHandler = new ErrorHandler.ErrorHandler();
+
+                //Handling CRUD
+                switch (context.Request.HttpMethod)
+                {
+                    case "GET":
+                        //Perform READ Operation                   
+                        READ(context);
+                        break;
+                    case "POST":
+                        //Perform CREATE Operation
+                        CREATE(context);
+                        break;
+                    case "PUT":
+                        //Perform UPDATE Operation
+                        //UPDATE(context);
+                        break;
+                    case "DELETE":
+                        //Perform DELETE Operation
+                        //DELETE(context);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                errHandler.ErrorMessage = ex.Message.ToString();
+                context.Response.Write(errHandler.ErrorMessage);
+            }
+        }
+
+        #endregion
+
+        #region CRUD Functions
+
+        private void READ(HttpContext context)
+        {
+            DateTime dt;
+            String useUtc = context.Request.QueryString["utc"];
+            if (!String.IsNullOrEmpty(useUtc) &&
+                    useUtc.Equals("true"))
+            {
+                dt = DateTime.UtcNow;
+            }
+            else
+            {
+                dt = DateTime.Now;
+            }
+            context.Response.Write(
+                String.Format("<h1>{0}</h1>",
+                               dt.ToLongTimeString()
+                               ));
+            context.Response.Write(
+                String.Format("<h1>{0}</h1>", translationData)
+                );
+        }
+
+        private void CREATE(HttpContext context)
+        {
+            // The message body is posted as bytes. read the bytes
+            byte[] postData = context.Request.BinaryRead(context.Request.ContentLength);
+
+            goto Translate;
+            /*
+            System.IO.MemoryStream memoryStream = new System.IO.MemoryStream(postData);
+
+            //BsonReader bsonReader = new BsonReader(memoryStream);
+
+            TranslationRequestData trd2 = new TranslationRequestData();
+            
+            trd2.FromBson(memoryStream);
+            
+            //trd2.readBson(bsonReader);
+            translationData += trd2.SourceLanguage + " ";
+            translationData += trd2.TargetLanguage + " ";
+            //trd2.
+            //translationData += trd2.Image.Width;
+
+            context.Response.Write("Received: ");
+            context.Response.Write(translationData);
+            context.Response.Write("LOOK, A STRING!");
+            */
+        Translate:
+            String translationRequestString = Encoding.UTF8.GetString(postData, 0, context.Request.ContentLength);
+            try
+            {
+                OcrTranslator translator = new OcrTranslator();
+                String translationResult = translator.Translate(translationRequestString, "fr", "en");
+                context.Response.Write("Translation result: ");
+                context.Response.Write(translationResult);
+            }
+            catch (Exception ex)
+            {
+                context.Response.Write("Exception!" + ex.Message);
+                context.Response.Write("Exception!" + ex.StackTrace);
+            }
+            
+        }
+
+        #endregion
+    }
+
+
+    /*interface IBsonSerializable
+    {
+        /// <summary>
+        /// Writes an object to Bson
+        /// </summary>
+        /// <param name="writer">An instance of BsonWriter</param>
+        void writeBson(BsonWriter writer);
+
+        /// <summary>
+        /// Populates an object with values from Bson
+        /// </summary>
+        /// <param name="reader">An instance of BsonReader</param>
+        void readBson(BsonReader reader);
+    }
+    
+    public class TranslationRequestData : IBsonSerializable
+    {
+
+        private int iVersion = 1;
+        public int Version
+        {
+            get { return iVersion; }
+        }
+
+        private string szSourceLanguage;
+        public string SourceLanguage
+        {
+            get { return szSourceLanguage; }
+            set { szSourceLanguage = value; }
+        }
+
+        private string szTargetLanguage;
+        public string TargetLanguage
+        {
+            get { return szTargetLanguage; }
+            set { szTargetLanguage = value; }
+        }
+
+        private Image oSourceImage;
+        public Image SourceImage
+        {
+            get { return oSourceImage; }
+            set { oSourceImage = value; }
+        }
+
+        /// <summary>
+        /// Default Constructor
+        /// </summary>
+        public TranslationRequestData()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="sourceLanguage">The language the text of the image is in</param>
+        /// <param name="targetLanguage">The language to translate the source into</param>
+        /// <param name="sourceImage">The image containing the source text</param>
+        public TranslationRequestData(string sourceLanguage, string targetLanguage, Bitmap sourceImage)
+        {
+            this.SourceLanguage = sourceLanguage;
+            this.TargetLanguage = targetLanguage;
+            this.SourceImage = sourceImage;
+        }
+
+
+        public void writeBson(BsonWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName("SourceLanguage");
+            writer.WriteValue(this.szSourceLanguage);
+            writer.WritePropertyName("TargetLanguage");
+            writer.WriteValue(this.szTargetLanguage);
+            writer.WritePropertyName("Version");
+            writer.WriteValue(this.iVersion);
+            writer.WritePropertyName("Image");
+
+            MemoryStream ms = new MemoryStream();
+            this.oSourceImage.Save(ms, System.Drawing.Imaging.ImageFormat.Gif);
+            writer.WriteValue(ms.ToArray());
+
+            writer.WriteEndObject();
+        }
+
+        public void readBson(BsonReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
+                {
+                    if (String.Equals(reader.Value, "SourceLanguage"))
+                    {
+                        szSourceLanguage = reader.ReadAsString();
+                    }
+                    else if (String.Equals(reader.Value, "TargetLanguage"))
+                    {
+                        szTargetLanguage = reader.ReadAsString();
+                    }
+                    else if (String.Equals(reader.Value, "Version"))
+                    {
+                        iVersion = (int)reader.ReadAsInt32();
+                    }
+                    else if (String.Equals(reader.Value, "Image"))
+                    {
+                        byte[] imgByteArr = reader.ReadAsBytes();
+                        MemoryStream ms = new MemoryStream(imgByteArr);
+                        oSourceImage = Image.FromStream(ms);
+                    }
+                }
+            }
+        }
+    }*/
+}
+
+    namespace ErrorHandler
+    {
+        //Class responsible for handling error messages
+        public class ErrorHandler
+        {
+            static StringBuilder errMessage = new StringBuilder();
+
+            //Make class immutable
+            static ErrorHandler()
+            {
+            }
+            /// <summary>
+            /// Prperty - holds exception messages encountered 
+            /// at code execution
+            /// </summary>
+            public string ErrorMessage
+            {
+                get { return errMessage.ToString(); }
+                set
+                {
+                    errMessage.AppendLine(value);
+                }
+            }
+        }
+    }

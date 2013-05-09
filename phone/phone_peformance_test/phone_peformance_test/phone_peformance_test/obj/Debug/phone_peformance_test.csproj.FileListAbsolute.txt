@@ -1,0 +1,17 @@
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\ApplicationIcon.png
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\Background.png
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\data\monkeys.jpg
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\phone_peformance_test.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\phone_peformance_test.pdb
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\AppManifest.xaml
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\phone_peformance_test.xap
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\WriteableBitmapExWinPhone.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\WriteableBitmapExWinPhone.pdb
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\Bin\Debug\WriteableBitmapExWinPhone.xml
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\obj\Debug\phone_peformance_test.csprojResolveAssemblyReference.cache
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\obj\Debug\App.g.i.cs
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\obj\Debug\MainPage.g.i.cs
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\obj\Debug\phone_peformance_test.g.resources
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\obj\Debug\phone_peformance_test.dll
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\obj\Debug\phone_peformance_test.pdb
+C:\Users\Patrick\Documents\OCRTranslateSVN\phone\phone_peformance_test\phone_peformance_test\phone_peformance_test\obj\Debug\XapCacheFile.xml
